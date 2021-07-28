@@ -1,0 +1,171 @@
+﻿
+@{
+    ViewBag.Title = "View";
+}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+
+
+<h2>Quadratic Graphing</h2>
+<p>Click the "Draw" button to show the two curves: </p>
+<p>The purple curve is the start curve for all equations. The blue curve is
+    the target.</p>
+<p>Graphing rules: </p>
+<ul>
+    <li>First, click  the area around the intercept</li>
+    <li>Second, click the area where the axis of the symmetry passes </li>
+    <li>Third, click the area around vertex</li>
+</ul>
+<canvas id="myCanvas" width="600" height="300" style="border: 1px solid black;"></canvas>
+<br>
+<br>
+<div id="quadEquation">
+    \( y = ax^2 + bx + c \)
+</div>
+
+<br />
+
+<label for="a">a: </label>
+<input type="text" id="aCoe" name="a" value="2">
+<br>
+<br>
+<label for="b">b: </label>
+<input type="text" id="bCoe" name="b" value="-4">
+<br>
+<br>
+<label for="c">c: </label>
+<input type="text" id="cCoe" name="c" value="3">
+<br>
+<br>
+<button id="btnDraw">Draw</button>
+<br>
+<br>
+<p>
+    Student score:
+</p>
+<div>
+    <input type="checkbox" id="intercept" name="intercept" value="Bike">
+    <label for="intercept"> intercept</label><br>
+    <input type="checkbox" id="axisofsymmetry" name="axisofsymmetry" value="Car">
+    <label for="axisofsymmetry"> axis of the symmetry</label><br>
+    <input type="checkbox" id="vertex" name="vertex" value="Boat">
+    <label for="vertex"> vertex</label><br><br>
+</div>
+
+<script src="~/Scripts/Graph/graph.js"></script>
+<script src="~/Scripts/Graph/Quadratic/quadratic.graph.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var a = $("#aCoe").val();
+        var b = $("#bCoe").val();
+        var c = $("#cCoe").val();
+
+        var myGraph = new QuadraticGraph(
+            "myCanvas",
+            -10,
+            -10,
+            10,
+            10,
+            1,
+            a,
+            b,
+            c
+        );
+
+        const canvas = document.querySelector("#myCanvas");
+        //const canvas = document.getElementById('myCanvas')
+        canvas.addEventListener('mousedown', function (e) {
+            getCursorPosition(myGraph, canvas, e)
+        });
+
+        $("#btnDraw").click(function () {
+            //clear canvas, reset graph
+            myGraph.is_intercept_correct = false;
+            myGraph.is_axis_of_symetry_correct = false;
+            myGraph.is_vertex_correct = false;
+
+            myGraph.context.clearRect(0, 0, canvas.width, canvas.height);
+            myGraph.drawXAxis();
+            myGraph.drawYAxis();
+
+            //reset target equation
+            myGraph.a = $("#aCoe").val();
+            myGraph.b = $("#bCoe").val();
+            myGraph.c = $("#cCoe").val();
+
+            //reset temp equation
+            myGraph.a1 = 1;
+            myGraph.b1 = 0;
+            myGraph.c1 = 0;
+            draw(myGraph);
+
+            //build equation dynamically
+            let str = '\\(y =' + myGraph.a;
+            str += 'x^2';
+
+            if (myGraph.b > 0) {
+                str += ' +' + myGraph.b + 'x';
+            } else if (myGraph.b < 0) {
+                str += myGraph.b + 'x';
+            } else {
+                // ignore b term;
+            }
+
+            if (myGraph.c > 0) {
+                str += ' +' + myGraph.c;
+            } else if (myGraph.c < 0) {
+                str += myGraph.c;
+            } else {
+                // ignore c term;
+            }
+            str += '\\)';
+
+            $("#quadEquation").html(str);
+            MathJax.typeset() //reset math equations
+
+        });
+    });
+
+    function getCursorPosition(myGraph, canvas, event) {
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+
+        //center and scale the mouse point
+        let mouse_x = (x - myGraph.centerX) / myGraph.scaleX;
+        let mouse_y = -(y - myGraph.centerY) / myGraph.scaleY;
+        console.log("mouse_x: " + mouse_x + " mouse_y: " + mouse_y);
+
+
+
+        //redraw
+        //1. two points quadratic first y= ax^2 + bx
+        // clear the whole canvas
+        myGraph.context.clearRect(0, 0, canvas.width, canvas.height);
+        myGraph.drawXAxis();
+        myGraph.drawYAxis();
+
+        myGraph.decideQuadratic(mouse_x, mouse_y);
+
+        myGraph.drawEquation(myGraph.quad, "blue", 5);
+        myGraph.drawVerticalLine(myGraph.axisOfSymmetry, "red", 5, "dash");
+
+        myGraph.drawEquation(myGraph.quad1, "purple", 3);
+    }
+
+    function draw(myGraph) {
+        //disable button to prevent creating another instance of graph
+        //document.getElementById("myBtn").disabled = true;
+
+        myGraph.drawEquation(myGraph.quad, "blue", 5);
+        myGraph.drawVerticalLine(myGraph.axisOfSymmetry, "red", 5, "dash");
+
+        //draw default baseline graph
+        myGraph.drawEquation((x) => x * x, "purple", 2);
+        myGraph.drawVerticalLine(0, "purple", 5, "dash");
+
+    }
+</script>

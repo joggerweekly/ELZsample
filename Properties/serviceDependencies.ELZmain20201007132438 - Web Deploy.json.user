@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "restored": true,
+      "restoreTime": "2020-10-07T20:28:37.4322468Z"
+    }
+  },
+  "parameters": {
+    "resourceGroup": {
+      "Type": "resourceGroup",
+      "Value": "SigninGoogle20201005212800ResourceGroup"
+    },
+    "subscriptionId": {
+      "Type": "subscription",
+      "Value": "01322d71-2b9d-4719-ba73-cc6fbf1711b2"
+    }
+  }
+}
